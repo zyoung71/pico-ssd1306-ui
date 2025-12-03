@@ -1,0 +1,6 @@
+[submodule "lib/pico-ssd1306"]
+	path = lib/pico-ssd1306
+	url = https://github.com/daschr/pico-ssd1306
+[submodule "lib/pico-interactive-ui"]
+	path = lib/pico-interactive-ui
+	url = https://github.com/zyoung71/pico-interactive-ui
