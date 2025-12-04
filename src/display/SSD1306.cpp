@@ -6,6 +6,7 @@
 SSD1306::SSD1306(uint8_t sda_pin, uint8_t scl_pin, i2c_inst_t* i2c_inst)
 {
     display.external_vcc = false;
+    selected_font = make_array_view(font_8x5);
     ssd1306_init(&display, 128, 64, 0x3C, i2c_inst);
     ssd1306_clear(&display);
 }
@@ -75,6 +76,15 @@ void SSD1306::DrawSquare(Vec2u32 pos, Vec2u32 size, uint32_t color, bool is_outl
     else
         ssd1306_draw_square(&display, pos.x, pos.y, size.x, size.y);
 }
+
+void SSD1306::ChangeFont(void* font_data)
+{
+    if (ArrayView<uint8_t>* font = (ArrayView<uint8_t>*)font_data)
+    {
+        selected_font = *font;
+    }
+}
+
 void SSD1306::DisplayBitmap(const uint8_t* bitmap_buff, size_t bitmap_size)
 {
     ssd1306_bmp_show_image(&display, bitmap_buff, bitmap_size);

@@ -37,6 +37,8 @@ public:
     void DrawPolygon(const Vec2u32* points, size_t pos_count, uint32_t, bool is_outline = true) override;
     void DrawSquare(Vec2u32 pos, Vec2u32 size, uint32_t, bool is_outline = true) override;
 
+    void ChangeFont(void* font_data) override;
+
     void DisplayBitmap(const uint8_t* bitmap_buff, size_t bitmap_size) override;
     void ClearDisplay() override;
     void InvertColors() override;
