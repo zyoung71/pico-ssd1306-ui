@@ -3,12 +3,44 @@
 
 #include <cstring>
 
-SSD1306::SSD1306(uint8_t sda_pin, uint8_t scl_pin, i2c_inst_t* i2c_inst)
+SSD1306::SSD1306(uint8_t sda_pin, uint8_t scl_pin, i2c_inst_t* i2c_inst, uint8_t addr)
+    : sda_pin(sda_pin), scl_pin(scl_pin), addr(addr), i2c_inst(i2c_inst)
+{
+    gpio_set_function(sda_pin, GPIO_FUNC_I2C);
+    gpio_set_function(scl_pin, GPIO_FUNC_I2C);
+    gpio_pull_up(sda_pin);
+    gpio_pull_up(scl_pin);
+
+    display.external_vcc = false;
+    ssd1306_init(&display, 128, 64, addr, i2c_inst);
+    ssd1306_clear(&display);
+}
+
+SSD1306::SSD1306(const SSD1306& other)
+    : sda_pin(sda_pin), scl_pin(scl_pin), addr(other.addr == 0x3C ? 0x3D : 0x3C), i2c_inst(other.i2c_inst)
 {
     display.external_vcc = false;
-    selected_font = make_array_view(font_8x5);
-    ssd1306_init(&display, 128, 64, 0x3C, i2c_inst);
+    ssd1306_init(&display, 128, 64, addr, i2c_inst);
     ssd1306_clear(&display);
+}
+
+SSD1306& SSD1306::operator=(const SSD1306& other)
+{
+    if (this == &other)
+        return *this;
+
+    display.external_vcc = other.display.external_vcc;
+
+    sda_pin = other.sda_pin;
+    scl_pin = other.scl_pin;
+    addr = other.addr;
+    i2c_inst = other.i2c_inst;
+
+    ssd1306_deinit(&display);
+    ssd1306_init(&display, 128, 64, addr, i2c_inst);
+    ssd1306_clear(&display);
+
+    return *this;
 }
 
 void SSD1306::Power(bool power_on)
@@ -24,25 +56,37 @@ void SSD1306::UpdateDisplay()
     ssd1306_show(&display);
 }
 
-void SSD1306::DrawText(Vec2u32 pos, const TextProperties& props, uint32_t)
+void SSD1306::DrawText(Vec2u32 pos, const char* text, const Font* font, uint32_t)
 {
-    char vbuff[strlen(props.text) + 1];
-    size_t segment_len = 0;
-    for (size_t line = 0; line < props.lines; line++)
+    size_t len = strlen(text) + 1;
+    char vbuff[len];
+    size_t track = 0;
+    size_t line = 0;
+
+    uint8_t font_data[font->char_bitmap.length + 5];
+    font_data[0] = font->char_height;
+    font_data[1] = font->char_width;
+    font_data[2] = font->char_spacing;
+    font_data[3] = font->ascii_begin;
+    font_data[4] = font->ascii_end;
+    
+    memcpy(font_data + 5, font->char_bitmap.data, font->char_bitmap.length);
+
+    while (track < len)
     {
-        size_t next_segment_len = strcspn(props.text + segment_len, "\n");
-        strncpy(vbuff, props.text + segment_len, next_segment_len);
-        segment_len = next_segment_len + 1;
-        
-        ssd1306_draw_string_with_font(&display, pos.x, pos.y + line * (props.spacing + props.height), 1, selected_font.data, vbuff);
+        size_t next_segment_len = strcspn(text, "\n");
+        strncpy(vbuff, text + track, next_segment_len);
+        track += next_segment_len;
+        vbuff[len - 1] = '\0';
+        ssd1306_draw_string_with_font(&display, pos.x, pos.y + (line++) * (font->char_spacing + font->char_height), 1, font_data, vbuff);
     }
 }
 void SSD1306::DrawPixel(Vec2u32 pos, uint32_t color)
 {
-    if (color == 0)
-        ssd1306_clear_pixel(&display, pos.x, pos.y);
-    else
+    if (color)
         ssd1306_draw_pixel(&display, pos.x, pos.y);
+    else
+        ssd1306_clear_pixel(&display, pos.x, pos.y);
 }
 void SSD1306::DrawLine(Vec2u32 pos_begin, Vec2u32 pos_end, uint32_t)
 {
@@ -75,14 +119,6 @@ void SSD1306::DrawSquare(Vec2u32 pos, Vec2u32 size, uint32_t color, bool is_outl
         ssd1306_draw_empty_square(&display, pos.x, pos.y, size.x, size.y);
     else
         ssd1306_draw_square(&display, pos.x, pos.y, size.x, size.y);
-}
-
-void SSD1306::ChangeFont(void* font_data)
-{
-    if (ArrayView<uint8_t>* font = (ArrayView<uint8_t>*)font_data)
-    {
-        selected_font = *font;
-    }
 }
 
 void SSD1306::DisplayBitmap(const uint8_t* bitmap_buff, size_t bitmap_size)
