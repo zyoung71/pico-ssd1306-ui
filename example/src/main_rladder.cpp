@@ -187,6 +187,11 @@ void move_volume_box()
 
     if (!volume_indicator.IsMoving() && volume_indicator.GetOriginPosition() != volume_ind_move.end_pos)
     {
+        if (lpm)
+            volume_ind_move.duration = 0.f;
+        else
+            volume_ind_move.duration = 1.f;
+
         volume_indicator.Move(volume_ind_move);
     }
     else
@@ -212,9 +217,16 @@ void vol_up_button_callback(const Event*, void*)
     
     printf("Volume Up: %d\n", volume_percentage);
     
+    if (!screen_pwr)
+        return;
+
     update_volume_graphic();
     move_volume_box();
+
     manager.Update();
+
+    if (lpm)
+        lpm_sleep_timer.Start(5000);
 }
 
 int main()
@@ -290,6 +302,11 @@ int main()
     };
 
     int id_vol_move = volume_move_timer.AddAction([](const Event*, void*){
+        if (lpm)
+            volume_ind_move.duration = 0.f;
+        else
+            volume_ind_move.duration = 1.f;
+
         volume_indicator.Move(volume_ind_move, true, false);
     });
 
