@@ -32,11 +32,13 @@ public:
     void UpdateDisplay() override;
     void Power(bool power_on) override;
 
-    void DrawText(Vec2u32 pos, const char* text, const Font* font, uint32_t) override;
-    void DrawPixel(Vec2u32 pos, uint32_t);
-    void DrawLine(Vec2u32 pos_begin, Vec2u32 pos_end, uint32_t) override;
-    void DrawPolygon(const Vec2u32* points, size_t pos_count, uint32_t, bool is_outline = true) override;
-    void DrawSquare(Vec2u32 pos, Vec2u32 size, uint32_t, bool is_outline = true) override;
+    void DrawText(Vec2i32 pos, const char* text, const Font* font, uint32_t) override;
+    void DrawPixel(Vec2i32 pos, uint32_t);
+    void DrawLine(Vec2i32 pos_begin, Vec2i32 pos_end, uint32_t) override;
+    void DrawPolygon(const Vec2i32* points, size_t pos_count, uint32_t, bool is_outline = true) override;
+    void DrawSquare(Vec2i32 pos, Vec2i32 size, uint32_t, bool is_outline = true) override;
+
+    void DrawScrollingText(Vec2i32 pos, const char* text, bool move_left, const Font* font, uint32_t color) override;
 
     void DisplayBitmap(const uint8_t* bitmap_buff, size_t bitmap_size) override;
     void ClearDisplay() override;

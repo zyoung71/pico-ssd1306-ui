@@ -5,10 +5,12 @@
 #include <interactive-ui/ScreenManager.h>
 #include <interactive-ui/components/TextComponent.h>
 #include <interactive-ui/components/PaddingComponent.h>
-#include <interactive-ui/components/IconComponent.h>
+#include <interactive-ui/components/BitmapComponent.h>
 
 #include <hardware/Button.h>
 #include <hardware/Timer.h>
+
+#include <math/Graphics.h>
 
 #include <Icons.h>
 
@@ -45,7 +47,7 @@ TextBoxComponent settings_volume(&manager, Vec2u32{4, 40}, Vec2u32{43, 10}, Vec2
 
 bool lpm = false;
 bool screen_pwr = true;
-IconComponent battery(&manager, Vec2u32{111, 4}, battery_icon, 0);
+BitmapComponent battery(&manager, Vec2u32{111, 4}, battery_icon, 0);
 TextComponent battery_lpm_message(&manager, Vec2u32{90, 4}, "LPM", &SSD1306::default_font, 0);
 
 CountdownTimer lpm_sleep_timer;
@@ -226,6 +228,13 @@ int main()
         manager.PushScreen(&screen3);
     });
 
+    int id_selecttext4 = text4.AddAction([](const Event*, void*){
+        MovementAnimation animation(&text4, graphics::easing::lut_cubic_in_out);
+        animation.duration = 1.f;
+        animation.end_pos = Vec2u32{100, 40};
+        text4.Move(animation);
+    });
+
     int id_screen3_back = settings_back.AddAction([](const Event*, void*){
         manager.QueueControl(ControlAction::BACK);
         manager.Update();
@@ -255,5 +264,6 @@ int main()
     while (1)
     {
         Event::HandleEvents();
+        manager.UpdateIfAnyComponentMoving();
     }
 }
