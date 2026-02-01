@@ -65,8 +65,8 @@ PixelBufferComponent volume_variable_checkbox_check(&manager, Vec2i32{81, 29}, x
 
 bool lpm = false;
 bool screen_pwr = true;
-BitmapComponent battery(&manager, Vec2i32{110, 4}, battery_icon, 10);
-TextComponent battery_lpm_message(&manager, Vec2i32{90, 4}, "LPM", &SSD1306::default_font, 10);
+BitmapComponent battery(&manager, Vec2i32{126, 2}, battery_icon, 10);
+TextComponent battery_lpm_message(&manager, battery.GetOriginPosition() + Vec2i32{-20, 2}, "LPM", &SSD1306::default_font, 10);
 
 CountdownTimer lpm_sleep_timer;
 
@@ -77,7 +77,7 @@ PixelBufferComponent vol_lvl_1(&manager, Vec2i32{31, 4}, volume_level_1_icon, 5,
 PixelBufferComponent vol_lvl_2(&manager, Vec2i32{32, 2}, volume_level_2_icon, 5, &screen1);
 PixelBufferComponent vol_lvl_3(&manager, Vec2i32{33, 0}, volume_level_3_icon, 5, &screen1);
 
-TextBoxComponent volume_indicator(&manager, Vec2i32{47, -20}, Vec2i32{32, 12}, Vec2i32{5, 2}, vol_txt, &SSD1306::default_font, 10, &screen1);
+TextBoxComponent volume_indicator(&manager, Vec2i32{63, -20}, Vec2i32{32, 12}, Vec2i32{5, 2}, vol_txt, &SSD1306::default_font, 10, &screen1);
 MovementAnimation volume_ind_move(&volume_indicator, graphics::easing::lut_quad_out);
 CountdownTimer volume_move_timer;
 
@@ -273,6 +273,16 @@ int main()
 
     puts("Added components.");
 
+    battery.SetHorizontalAlignment(AlignmentHorizontal::RIGHT);
+    battery_lpm_message.SetHorizontalAlignment(AlignmentHorizontal::RIGHT);
+
+    volume_indicator.SetHorizontalAlignment(AlignmentHorizontal::CENTER);
+    volume_indicator.SetTextHorizontalAlignment(AlignmentHorizontal::CENTER);
+
+    volume_variable_checkbox.SetTextHorizontalAlignment(AlignmentHorizontal::CENTER);
+
+    puts("Aligned components.");
+
     // Sorts the components by Z-layer. Lowest Z-layer components drawn first.
     // It also chooses the highest Z-layer selectable component by default.
     screen1.SortComponents();
@@ -293,8 +303,8 @@ int main()
 
     puts("Components are setup.");
 
-    volume_ind_move.start_pos = {47, -20};
-    volume_ind_move.end_pos = {47, 2};
+    volume_ind_move.start_pos = volume_indicator.GetOriginPosition();
+    volume_ind_move.end_pos = Vec2i32{63, 2};
     volume_ind_move.duration = 1.f;
 
     volume_ind_move.on_animation_end = [](const MovementAnimation*){
@@ -341,8 +351,8 @@ int main()
     int id_down_repeat = down_button_repeat.AddAction(&down_button_callback);
     int id_up_repeat = up_button_repeat.AddAction(&up_button_callback);
 
-    AnalogRepeatingDevice vol_up_button_repeating(26, 1400, vol_up_repeat, 500, 250);
-    AnalogRepeatingDevice vol_down_button_repeating(26, 2000, vol_down_repeat, 500, 250);
+    AnalogRepeatingDevice vol_up_button(26, 1400, vol_up_repeat, 500, 250);
+    AnalogRepeatingDevice vol_down_button(26, 2000, vol_down_repeat, 500, 250);
 
     AnalogDevice back_button(26, 2500);
     AnalogDevice select_button(26, 2750);
@@ -362,16 +372,14 @@ int main()
     int id_back_button = back_button.AddAction(&back_button_callback);
     //int id_vol_down_button = vol_down_button.AddAction(&vol_down_button_callback);
     //int id_vol_up_button = vol_up_button.AddAction(&vol_up_button_callback);
-    int id_vol_down_button = vol_down_button_repeating.AddAction(&vol_down_button_callback);
-    int id_vol_up_button = vol_up_button_repeating.AddAction(&vol_up_button_callback);
+    int id_vol_down_button = vol_down_button.AddAction(&vol_down_button_callback);
+    int id_vol_up_button = vol_up_button.AddAction(&vol_up_button_callback);
 
     puts("Callbacks linked.");
 
     ResistorLadder<8> rladder(16, Pull::UP, GPIO_IRQ_EDGE_FALL);
-    //rladder[0] = &vol_up_button;
-    //rladder[1] = &vol_down_button;
-    rladder[0] = &vol_up_button_repeating;
-    rladder[1] = &vol_down_button_repeating;
+    rladder[0] = &vol_up_button;
+    rladder[1] = &vol_down_button;
     rladder[2] = &back_button;
     rladder[3] = &select_button;
     rladder[4] = &right_button;
@@ -380,7 +388,7 @@ int main()
     rladder[7] = &up_button;
 
     // Resistor ladder doesn't require an IRQ callback, it instead wraps the analog devices
-    //rladder.SortDevices();
+    rladder.SortDevices();
 
     puts("Resistor ladder initialized.");
 

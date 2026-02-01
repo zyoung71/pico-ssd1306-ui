@@ -55,14 +55,9 @@ void SSD1306::UpdateDisplay()
 {
     ssd1306_show(&display);
 }
-#include <stdio.h>
+
 void SSD1306::DrawText(Vec2i32 pos, const char* text, const Font* font, uint32_t)
 {
-    size_t len = strlen(text) + 1;
-    char vbuff[len];
-    size_t track = 0;
-    size_t line = 0;
-
     uint8_t font_data[font->char_bitmap.length + 5];
     font_data[0] = font->char_height;
     font_data[1] = font->char_width;
@@ -71,32 +66,7 @@ void SSD1306::DrawText(Vec2i32 pos, const char* text, const Font* font, uint32_t
     font_data[4] = font->ascii_end;
     
     memcpy(font_data + 5, font->char_bitmap.data, font->char_bitmap.length);
-
-    while (track < len)
-    {
-        /**
-         * Example:
-         * "Hello\n.\nWorld"
-         * len = 14 (13 char + 1)
-         * first iteration: segment_len = 5, copy "Hello" info vbuff, span = 5, vbuff[5] = nullterm, draw "Hello", track goes from 0 to 6
-         * second iteration: segment_len = 1, copy "." info vbuff + 6, span = 7, vbuff[7] = nullterm, draw ".", track goes from 6 to 8
-         * third iteration: segment_len = 5, copy "World" info vbuff + 8, span = 13, vbuff[13] = nullterm, draw "World", track goes from 8 to 13
-         * 
-         * Example 2:
-         * "test\n\ntext"
-         * len = 11
-         * first iteration: segment_length = 4, copy "test" info vbuff, span = 4, vbuff[4] = nullterm, draw "test", track goes from 0 to 5
-         * second iteration: segment_length = 0, copy "" info vbuff, span = 5, vbuff[5] = nullterm, draw "", track goes from 5 to 6
-         * third iteration: segment_length = 4, copy "text" info vbuff, span = 10, vbuff[10] = nullterm, draw "text", track goes from 6 to 11
-         */
-        size_t segment_len = strcspn(text + track, "\n");
-        strncpy(vbuff + track, text + track, segment_len);
-
-        size_t span = segment_len + track;
-        vbuff[span] = '\0';
-        ssd1306_draw_string_with_font(&display, pos.x, pos.y + (line++) * (font->char_spacing + font->char_height), 1, font_data, vbuff + track);
-        track = span + 1;
-    }
+    ssd1306_draw_string_with_font(&display, pos.x, pos.y, 1, font_data, text);
 }
 void SSD1306::DrawPixel(Vec2i32 pos, uint32_t color)
 {
