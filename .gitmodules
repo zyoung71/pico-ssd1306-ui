@@ -4,3 +4,6 @@
 [submodule "lib/pico-interactive-ui"]
 	path = lib/pico-interactive-ui
 	url = https://github.com/zyoung71/pico-interactive-ui
+[submodule "example/lib/pico-rtc"]
+	path = example/lib/pico-rtc
+	url = https://github.com/zyoung71/pico-rtc
