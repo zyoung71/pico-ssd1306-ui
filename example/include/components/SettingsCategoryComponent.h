@@ -8,7 +8,7 @@ private:
     static std::vector<SettingsCategoryComponent*> category_components;
 
 public:
-    SettingsCategoryComponent(ScreenManager* manager, const Vec2i32& origin, const Vec2i32& dimensions, const Vec2i32& padding, const char* text, const Font* font, int32_t z_layer, Screen* initial_screen = nullptr);
+    SettingsCategoryComponent(ScreenManager* manager, const Vec2i32& origin, const Vec2i32& dimensions, const char* text, const Font* font, int32_t z_layer, Screen* initial_screen = nullptr);
 
     void OnComponentHovered() override;
     void Draw() override;

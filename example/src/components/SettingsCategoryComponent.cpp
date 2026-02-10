@@ -2,8 +2,8 @@
 
 std::vector<SettingsCategoryComponent*> SettingsCategoryComponent::category_components;
 
-SettingsCategoryComponent::SettingsCategoryComponent(ScreenManager* manager, const Vec2i32& origin, const Vec2i32& dimensions, const Vec2i32& padding, const char* text, const Font* font, int32_t z_layer, Screen* initial_screen)
-    : TextBoxComponent(manager, origin, dimensions, padding, text, font, z_layer, initial_screen)
+SettingsCategoryComponent::SettingsCategoryComponent(ScreenManager* manager, const Vec2i32& origin, const Vec2i32& dimensions, const char* text, const Font* font, int32_t z_layer, Screen* initial_screen)
+    : TextBoxComponent(manager, origin, dimensions, text, font, z_layer, initial_screen)
 {
     category_components.push_back(this);
 }
