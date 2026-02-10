@@ -10,6 +10,7 @@
 #include <interactive-ui/components/PixelBufferComponent.h>
 
 #include <components/SettingsCategoryComponent.h>
+#include <components/ClockComponent.h>
 
 #include <hardware/Button.h>
 #include <hardware/Timer.h>
@@ -26,12 +27,14 @@ struct _init
     _init()
     {
         stdio_init_all();
-        i2c_init(i2c1, 400000);
+        i2c_init(i2c0, 100000);
+        i2c_init(i2c1, 600000);
         adc_init();
     }
 } _init_inst;
 
 SSD1306 display(2, 3, i2c1);
+
 ScreenManager manager(&display);
 Screen screen1(&manager, screen_dimensions);
 Screen screen2(&manager, screen_dimensions);
@@ -63,21 +66,32 @@ TextComponent volume_screen_name(&manager, Vec2i32{24, 4}, "Volume Control", &SS
 TextBoxComponent volume_variable_checkbox(&manager, Vec2i32{80, 28}, Vec2i32{7, 7}, Vec2i32{-20, -10}, "Variable\n\nVolume", &SSD1306::default_font, 0, &screen_volume_control);
 PixelBufferComponent volume_variable_checkbox_check(&manager, Vec2i32{81, 29}, x_icon, 1, &screen_volume_control);
 
+char cc_hour[3];
+char cc_minute[3];
+Screen screen_clock_control(&manager, screen_dimensions);
+TextBoxComponent hour_control(&manager, Vec2f{0.25f, 0.5f}, Vec2i32{15, 13}, Vec2i32{2, 2}, cc_hour, &SSD1306::default_font, 1, &screen_clock_control);
+TextBoxComponent minute_control(&manager, Vec2f{0.75f, 0.5f}, Vec2i32{15, 13}, Vec2i32{2, 2}, cc_minute, &SSD1306::default_font, 1, &screen_clock_control);
+TextComponent time_control_colon(&manager, Vec2f{0.5f, 0.5f}, ":", &SSD1306::default_font, 1, &screen_clock_control);
+BitmapComponent hour_increment(&manager, Vec2i32{0, 0}, increment_icon, 1, &screen_clock_control); // set pos later
+BitmapComponent hour_decrement = hour_increment;
+BitmapComponent minute_increment = hour_increment;
+BitmapComponent minute_decrement = hour_increment;
+TextBoxComponent clock_control_confirm(&manager, Vec2f{0.5f, 0.8f}, Vec2i32{53, 13}, Vec2i32{2, 2}, "Confirm", &SSD1306::default_font, 1, &screen_clock_control);
+
 bool lpm = false;
 bool screen_pwr = true;
 BitmapComponent battery(&manager, Vec2i32{126, 2}, battery_icon, 10);
 TextComponent battery_lpm_message(&manager, battery.GetOriginPosition() + Vec2i32{-20, 2}, "LPM", &SSD1306::default_font, 10);
-
 CountdownTimer lpm_sleep_timer;
 
 uint8_t volume_percentage = 50;
-BitmapComponent speaker(&manager, Vec2i32{19, 0}, speaker_icon, 5, &screen1);
-PixelBufferComponent vol_mute(&manager, Vec2i32{31, 5}, x_icon, 6, &screen1);
-PixelBufferComponent vol_lvl_1(&manager, Vec2i32{31, 4}, volume_level_1_icon, 5, &screen1);
-PixelBufferComponent vol_lvl_2(&manager, Vec2i32{32, 2}, volume_level_2_icon, 5, &screen1);
-PixelBufferComponent vol_lvl_3(&manager, Vec2i32{33, 0}, volume_level_3_icon, 5, &screen1);
+BitmapComponent speaker(&manager, Vec2i32{0, 0}, speaker_icon, 5, &screen1);
+PixelBufferComponent vol_mute(&manager, Vec2i32{12, 5}, x_icon, 6, &screen1);
+PixelBufferComponent vol_lvl_1(&manager, Vec2i32{12, 4}, volume_level_1_icon, 5, &screen1);
+PixelBufferComponent vol_lvl_2(&manager, Vec2i32{13, 2}, volume_level_2_icon, 5, &screen1);
+PixelBufferComponent vol_lvl_3(&manager, Vec2i32{14, 0}, volume_level_3_icon, 5, &screen1);
 
-TextBoxComponent volume_indicator(&manager, Vec2i32{63, -20}, Vec2i32{32, 12}, Vec2i32{5, 2}, vol_txt, &SSD1306::default_font, 10, &screen1);
+TextBoxComponent volume_indicator(&manager, Vec2i32{63, -20}, Vec2i32{32, 12}, Vec2i32{5, 2}, vol_txt, &SSD1306::default_font, INT32_MAX, &screen1);
 MovementAnimation volume_ind_move(&volume_indicator, graphics::easing::lut_quad_out);
 CountdownTimer volume_move_timer;
 
@@ -96,6 +110,8 @@ void button_callback_generic(const Event* ev, uint32_t control_mask, const char*
 
             return;
         }
+
+        manager.UpdateDeltaTime(); // eat large previous delta if any
 
         manager.QueueControl(control_mask);
         printf("%s Button Pressed.\n", name);
@@ -206,6 +222,7 @@ void vol_down_button_callback(const Event*, void*)
     printf("Volume Down: %d\n", volume_percentage);
     
     update_volume_graphic();
+    manager.UpdateDeltaTime();
     move_volume_box();
     manager.Update();
 }
@@ -233,14 +250,18 @@ int main()
 {
     puts("Program start.");
 
+    ClockComponent clock(&manager, Vec2i32{63, 2}, cc_hour, cc_minute, 4, 5, 6, &SSD1306::default_font, -1, &screen1);
+
+    puts("Objects created.");
+
     display.ClearDisplay();
 
     puts("Display Cleared.");
 
     // The initial screen was already given, so this overwrites the LUT entry.
-    text1.AddComponentTable(&screen1, &battery, &text2, nullptr, &text3);
+    text1.AddComponentTable(&screen1, &clock, &text2, nullptr, &text3);
     text2.AddComponentTable(&screen1, &text1, nullptr, nullptr, &text4);
-    text3.AddComponentTable(&screen1, &battery, &text4, &text1, nullptr);
+    text3.AddComponentTable(&screen1, &clock, &text4, &text1, nullptr);
     text4.AddComponentTable(&screen1, &text3, nullptr, &text2, nullptr);
 
     // Settings example screen
@@ -251,12 +272,18 @@ int main()
     settings_restart.AddComponentTable(&screen3, &settings_clock);
 
     // Since we gave a nullptr as the screen, we must construct a table for each screen using the component.
-    battery.AddComponentTable(&screen1, nullptr, &text3);
+    battery.AddComponentTable(&screen1, nullptr, &text3, &clock, nullptr);
     battery.AddComponentTable(&screen2);
     battery.AddComponentTable(&screen3, nullptr, &settings_display, &settings_back, nullptr);
 
+    clock.AddComponentTable(&screen1, nullptr, &text3, nullptr, &battery);
+
     volume_control_value.AddComponentTable(&screen_volume_control, nullptr, nullptr, nullptr, &volume_variable_checkbox);
     volume_variable_checkbox.AddComponentTable(&screen_volume_control, nullptr, nullptr, &volume_control_value, nullptr);
+
+    clock_control_confirm.AddComponentTable(&screen_clock_control, &hour_control, nullptr, &hour_control, &minute_control);
+    hour_control.AddComponentTable(&screen_clock_control, nullptr, &clock_control_confirm, nullptr, &minute_control);
+    minute_control.AddComponentTable(&screen_clock_control, nullptr, &clock_control_confirm, &hour_control, nullptr);
 
     puts("Component tables created.");
 
@@ -270,16 +297,31 @@ int main()
     screen3.AddComponent(&battery_lpm_message);
 
     screen_volume_control.AddComponent(&settings_padding);
+    screen_clock_control.AddComponent(&settings_padding);
 
     puts("Added components.");
 
     battery.SetHorizontalAlignment(AlignmentHorizontal::RIGHT);
     battery_lpm_message.SetHorizontalAlignment(AlignmentHorizontal::RIGHT);
 
+    clock.SetHorizontalAlignment(AlignmentHorizontal::CENTER);
+
     volume_indicator.SetHorizontalAlignment(AlignmentHorizontal::CENTER);
     volume_indicator.SetTextHorizontalAlignment(AlignmentHorizontal::CENTER);
 
     volume_variable_checkbox.SetTextHorizontalAlignment(AlignmentHorizontal::CENTER);
+
+    hour_control.SetAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
+    minute_control.SetAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
+    hour_increment.SetAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
+    hour_decrement.SetAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
+    minute_increment.SetAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
+    minute_decrement.SetAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
+    time_control_colon.SetAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
+
+    clock_control_confirm.SetHorizontalAlignment(AlignmentHorizontal::CENTER);
+    hour_control.SetTextAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
+    minute_control.SetTextAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
 
     puts("Aligned components.");
 
@@ -291,15 +333,25 @@ int main()
 
     puts("Sorted components.");
 
-    screen1.HoverComponent(&text1);
+    screen1.HoverComponent(&text1, true);
     // no screen 2 hover
-    screen3.HoverComponent(&settings_back);
-    screen_volume_control.HoverComponent(&volume_control_value);
+    screen3.HoverComponent(&settings_back, true);
+    screen_volume_control.HoverComponent(&volume_control_value, true);
+    screen_clock_control.HoverComponent(&hour_control, true);
 
     puts("Set the initial hovered components.");
 
+    volume_indicator.ClearBackgroundOnDraw(true);
+
     volume_decrement.SetOriginPosition(volume_increment.GetOriginPosition() + Vec2i32{0, 20});
     volume_decrement.MirrorVertically();
+
+    hour_increment.SetOriginPosition(hour_control.GetOriginPosition() - Vec2i32{0, 12});
+    hour_decrement.SetOriginPosition(hour_increment.GetOriginPosition() + Vec2i32{0, 24});
+    hour_decrement.MirrorVertically();
+    minute_increment.SetOriginPosition(hour_increment.GetOriginPosition() + Vec2i32{64, 0});
+    minute_decrement.SetOriginPosition(hour_decrement.GetOriginPosition() + Vec2i32{64, 0});
+    minute_decrement.MirrorVertically();
 
     puts("Components are setup.");
 
@@ -449,11 +501,31 @@ int main()
             lpm = !lpm;
             battery_lpm_message.SetPersonalVisibility(lpm);
             if (lpm)
+            {
                 lpm_sleep_timer.Start(5000);
+                screen1.SetHoverAnimationDuration(0);
+                screen2.SetHoverAnimationDuration(0);
+                screen3.SetHoverAnimationDuration(0);
+                screen_volume_control.SetHoverAnimationDuration(0);
+            }
             else
+            {
                 lpm_sleep_timer.End();
+                screen1.SetHoverAnimationDuration(0.25f);
+                screen2.SetHoverAnimationDuration(0.25f);
+                screen3.SetHoverAnimationDuration(0.25f);
+                screen_volume_control.SetHoverAnimationDuration(0.25f);
+            }
 
             manager.Update();
+        }
+    });
+
+    int id_clock_select = clock.AddAction([](const Event* ev, void*){
+        ComponentSelectEvent* event = ev->GetEventAsType<ComponentSelectEvent>();
+        if (event->GetControl() == ControlAction::SELECT0)
+        {
+            manager.PushScreen(&screen_clock_control);
         }
     });
 
@@ -470,7 +542,6 @@ int main()
         if (event->GetControl() == ControlAction::SELECT0)
         {
             manager.PushScreen(&screen_volume_control);
-            screen_volume_control.HoverComponent(&volume_control_value);
         }
     });
 
@@ -499,6 +570,23 @@ int main()
         {
             volume_variable_checkbox_check.SetPersonalVisibility(!volume_variable_checkbox_check.GetPersonalVisibility());
             manager.Update();
+        }
+    });
+
+    int id_settings_clock_tab = settings_clock.AddAction([](const Event* ev, void*){
+        ComponentSelectEvent* event = ev->GetEventAsType<ComponentSelectEvent>();
+        if (event->GetControl() == ControlAction::SELECT0)
+        {
+            manager.PushScreen(&screen_clock_control);
+        }
+    });
+
+    int id_clock_confirm = clock_control_confirm.AddAction([](const Event* ev, void*){
+        ComponentSelectEvent* event = ev->GetEventAsType<ComponentSelectEvent>();
+        if (event->GetControl() == ControlAction::SELECT0)
+        {
+
+            manager.PopScreen();
         }
     });
 

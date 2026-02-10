@@ -31,24 +31,24 @@ Screen screen1(&manager, screen_dimensions);
 Screen screen2(&manager, screen_dimensions);
 Screen screen3(&manager, screen_dimensions);
 
-TextComponent text1(&manager, Vec2u32{16, 20}, "0", &SSD1306::default_font, 1, &screen1);
-TextComponent text2(&manager, Vec2u32{16, 32}, "1", &SSD1306::default_font, 1, &screen1);
-TextComponent text3(&manager, Vec2u32{32, 20}, "2", &SSD1306::default_font, 1, &screen1);
-TextComponent text4(&manager, Vec2u32{32, 32}, "3", &SSD1306::default_font, 1, &screen1);
-PaddingComponent padding(&manager, Vec2u32{0, 16}, {127, 63 - 16}, true, 3, &screen1);
-TextBoxComponent hidden_message(&manager, Vec2u32{64, 32}, Vec2u32{64, 32}, Vec2u32{10, 10}, "Message", &SSD1306::default_font, 3, &screen1);
+TextComponent text1(&manager, Vec2i32{16, 20}, "0", &SSD1306::default_font, 1, &screen1);
+TextComponent text2(&manager, Vec2i32{16, 32}, "1", &SSD1306::default_font, 1, &screen1);
+TextComponent text3(&manager, Vec2i32{32, 20}, "2", &SSD1306::default_font, 1, &screen1);
+TextComponent text4(&manager, Vec2i32{32, 32}, "3", &SSD1306::default_font, 1, &screen1);
+PaddingComponent padding(&manager, Vec2i32{0, 16}, {127, 63 - 16}, true, 3, &screen1);
+TextBoxComponent hidden_message(&manager, Vec2i32{64, 32}, Vec2i32{64, 32}, Vec2i32{10, 10}, "Message", &SSD1306::default_font, 3, &screen1);
 
-TextBoxComponent screen2_message(&manager, Vec2u32{0, 0}, Vec2u32{127, 63}, Vec2u32{48, 4}, "Screen 2", &SSD1306::default_font, 0, &screen2);
+TextBoxComponent screen2_message(&manager, Vec2i32{0, 0}, Vec2i32{127, 63}, Vec2i32{48, 4}, "Screen 2", &SSD1306::default_font, 0, &screen2);
 
-PaddingComponent settings_padding(&manager, Vec2u32{0, 0}, Vec2u32{127, 63}, true, 0, &screen3);
-TextComponent settings_back(&manager, Vec2u32{4, 4}, "Back", &SSD1306::default_font, 2, &screen3);
-TextBoxComponent settings_display(&manager, Vec2u32{4, 20}, Vec2u32{43, 10}, Vec2u32{2, 2}, "Display", &SSD1306::default_font, 1, &screen3);
-TextBoxComponent settings_volume(&manager, Vec2u32{4, 40}, Vec2u32{43, 10}, Vec2u32{2, 2}, "Volume", &SSD1306::default_font, 1, &screen3);
+PaddingComponent settings_padding(&manager, Vec2i32{0, 0}, Vec2i32{127, 63}, true, 0, &screen3);
+TextComponent settings_back(&manager, Vec2i32{4, 4}, "Back", &SSD1306::default_font, 2, &screen3);
+TextBoxComponent settings_display(&manager, Vec2i32{4, 20}, Vec2i32{43, 10}, Vec2i32{2, 2}, "Display", &SSD1306::default_font, 1, &screen3);
+TextBoxComponent settings_volume(&manager, Vec2i32{4, 40}, Vec2i32{43, 10}, Vec2i32{2, 2}, "Volume", &SSD1306::default_font, 1, &screen3);
 
 bool lpm = false;
 bool screen_pwr = true;
-BitmapComponent battery(&manager, Vec2u32{111, 4}, battery_icon, 0);
-TextComponent battery_lpm_message(&manager, Vec2u32{90, 4}, "LPM", &SSD1306::default_font, 0);
+BitmapComponent battery(&manager, Vec2i32{111, 4}, battery_icon, 0);
+TextComponent battery_lpm_message(&manager, Vec2i32{90, 4}, "LPM", &SSD1306::default_font, 0);
 
 CountdownTimer lpm_sleep_timer;
 
@@ -231,7 +231,7 @@ int main()
     int id_selecttext4 = text4.AddAction([](const Event*, void*){
         MovementAnimation animation(&text4, graphics::easing::lut_cubic_in_out);
         animation.duration = 1.f;
-        animation.end_pos = Vec2u32{100, 40};
+        animation.end_pos = Vec2i32{100, 40};
         text4.Move(animation);
     });
 

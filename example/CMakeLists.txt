@@ -14,12 +14,17 @@ project(pico-ssd1306-ui-impl C CXX ASM)
 project(pico-ssd1306-ui-rladder C CXX ASM)
 
 add_subdirectory(../ build)
+add_subdirectory(lib/pico-rtc)
 
 add_executable(${CMAKE_PROJECT_NAME}
 src/main.cpp
 )
 
-add_executable(pico-ssd1306-ui-rladder-impl src/main_rladder.cpp src/components/SettingsCategoryComponent.cpp)
+add_executable(pico-ssd1306-ui-rladder-impl
+src/main_rladder.cpp
+src/components/SettingsCategoryComponent.cpp
+src/components/ClockComponent.cpp
+)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
 include
@@ -38,6 +43,7 @@ target_link_libraries(pico-ssd1306-ui-rladder-impl
 pico_stdlib
 pico-ssd1306-ui
 hardware_watchdog
+pico-rtc
 )
 
 target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE "-fno-exceptions")

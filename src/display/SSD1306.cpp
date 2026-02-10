@@ -98,12 +98,16 @@ void SSD1306::DrawPolygon(const Vec2i32* points, size_t pos_count, uint32_t, boo
         }, &display);
     }
 }
-void SSD1306::DrawSquare(Vec2i32 pos, Vec2i32 size, uint32_t color, bool is_outline)
+void SSD1306::DrawSquare(Vec2i32 pos, Vec2i32 size, uint32_t color, bool is_outline, bool fill_if_outline)
 {
     if (color == 0)
         ssd1306_clear_square(&display, pos.x, pos.y, size.x - 1, size.y - 1);
     else if (is_outline)
+    {
         ssd1306_draw_empty_square(&display, pos.x, pos.y, size.x - 1, size.y - 1);
+        if (fill_if_outline)
+            ssd1306_clear_square(&display, pos.x + 1, pos.y + 1, size.x - 2, size.y - 2);
+    }
     else
         ssd1306_draw_square(&display, pos.x, pos.y, size.x - 1, size.y - 1);
 }

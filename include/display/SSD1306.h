@@ -36,7 +36,7 @@ public:
     void DrawPixel(Vec2i32 pos, uint32_t);
     void DrawLine(Vec2i32 pos_begin, Vec2i32 pos_end, uint32_t) override;
     void DrawPolygon(const Vec2i32* points, size_t pos_count, uint32_t, bool is_outline = true) override;
-    void DrawSquare(Vec2i32 pos, Vec2i32 size, uint32_t, bool is_outline = true) override;
+    void DrawSquare(Vec2i32 pos, Vec2i32 size, uint32_t, bool is_outline = true, bool fill_if_outline = false) override;
 
     void DrawScrollingText(Vec2i32 pos, const char* text, bool move_left, const Font* font, uint32_t color) override;
 
