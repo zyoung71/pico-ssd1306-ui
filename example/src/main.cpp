@@ -361,8 +361,8 @@ int main()
     minute_decrement.SetOriginPosition(minute_increment.GetOriginPosition() + Vec2i32{0, 24});
     minute_decrement.mirror_vertically = true;
 
-    volume_variable_checkbox.padding = Vec2i32{-20, -20};
-    clock_change_time_fmt.padding = Vec2i32{-20, 0};
+    volume_variable_checkbox.SetPadding(Vec2i32{-20, -10});
+    clock_change_time_fmt.SetPadding(Vec2i32{-20, 0});
 
     puts("Components are setup.");
 
