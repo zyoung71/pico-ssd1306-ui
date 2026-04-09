@@ -1,3 +1,5 @@
+#define USING_RESISTOR_LADDER 0
+
 #include <stdio.h>
 
 #include <hardware/watchdog.h>
@@ -98,33 +100,41 @@ CountdownTimer volume_move_timer;
 
 void button_callback_generic(const Event* ev, uint32_t control_mask, const char* name = "")
 {
+#if USING_RESISTOR_LADDER
     AnalogEvent* event = (AnalogEvent*)ev;
     printf("ADC Val: %d\n", event->GetADCValue());
-    //if (event->WasPressed())
-    //{
-        if (!screen_pwr)
-        {
-            display.Power(true);
-            screen_pwr = true;
-            if (lpm)
-                lpm_sleep_timer.Start(5000);
+#else
+    ButtonEvent* event = (ButtonEvent*)ev;
+    if (event->WasPressed())
+    {
+#endif
 
-            return;
-        }
-
-        manager.UpdateDeltaTime(); // eat large previous delta if any
-
-        manager.QueueControl(control_mask);
-        printf("%s Button Pressed.\n", name);
-
-        manager.Update();
-
+    if (!screen_pwr)
+    {
+        display.Power(true);
+        screen_pwr = true;
         if (lpm)
-        {
             lpm_sleep_timer.Start(5000);
-        }
-    //}
-}
+    
+        return;
+    }
+
+    manager.UpdateDeltaTime(); // eat large previous delta if any
+
+    manager.QueueControl(control_mask);
+    printf("%s Button Pressed.\n", name);
+
+    manager.Update();
+
+    if (lpm)
+    {
+        lpm_sleep_timer.Start(5000);
+    }
+
+#if !USING_RESISTOR_LADDER
+    }
+#endif
+}    
 
 void select_button_callback(const Event* ev, void*)
 {
@@ -215,36 +225,49 @@ void move_volume_box()
         volume_move_timer.Start(1500);
 }
 
-void vol_down_button_callback(const Event*, void*)
+void volume_change(bool increase)
 {
-    if (volume_percentage > 0)
-    volume_percentage--;
-    
-    printf("Volume Down: %d\n", volume_percentage);
-    
+    if (increase && volume_percentage < 100)
+        volume_percentage++;
+    else if (!increase && volume_percentage > 0)
+        volume_percentage--;
+
     update_volume_graphic();
-    manager.UpdateDeltaTime();
     move_volume_box();
+
     manager.Update();
 }
 
-void vol_up_button_callback(const Event*, void*)
+void vol_down_button_callback(const Event* ev, void*)
 {
-    if (volume_percentage < 100)
-    volume_percentage++;
+#if !USING_RESISTOR_LADDER
+    if (ev->GetEventAsType<ButtonEvent>()->WasPressed())
+    {
+#endif
+
+    printf("Volume Down: %d\n", volume_percentage);
+    
+    volume_change(false);
+
+#if !USING_RESISTOR_LADDER
+    }
+#endif
+}
+
+void vol_up_button_callback(const Event* ev, void*)
+{
+#if !USING_RESISTOR_LADDER
+    if (ev->GetEventAsType<ButtonEvent>()->WasPressed())
+    {
+#endif
     
     printf("Volume Up: %d\n", volume_percentage);
     
-    if (!screen_pwr)
-        return;
+    volume_change(true);
 
-    update_volume_graphic();
-    move_volume_box();
-
-    manager.Update();
-
-    if (lpm)
-        lpm_sleep_timer.Start(5000);
+#if !USING_RESISTOR_LADDER
+    }
+#endif
 }
 
 int main()
@@ -256,7 +279,7 @@ int main()
     puts("Objects created.");
 
     display.ClearDisplay();
-    manager.SetCBF(true);
+    manager.EnableCBF(true);
 
     puts("Display Cleared.");
 
@@ -303,6 +326,8 @@ int main()
     screen_clock_control.AddComponent(&settings_padding);
 
     puts("Added components.");
+
+    hidden_message.SetTextAlignment(AlignmentVertical::CENTER, AlignmentHorizontal::CENTER);
 
     battery.SetHorizontalAlignment(AlignmentHorizontal::RIGHT);
     battery_lpm_message.SetHorizontalAlignment(AlignmentHorizontal::RIGHT);
@@ -400,6 +425,7 @@ int main()
 
     puts("Pushed screen.");
 
+    
     // Use the event system
     RepeatingTimer vol_up_repeat(25);
     RepeatingTimer vol_down_repeat(25);
@@ -416,6 +442,8 @@ int main()
     int id_down_repeat = down_button_repeat.AddAction(&down_button_callback);
     int id_up_repeat = up_button_repeat.AddAction(&up_button_callback);
 
+#if USING_RESISTOR_LADDER
+
     AnalogRepeatingDevice vol_up_button(26, 1400, vol_up_repeat, 500, 250);
     AnalogRepeatingDevice vol_down_button(26, 2000, vol_down_repeat, 500, 250);
 
@@ -423,9 +451,30 @@ int main()
     AnalogDevice select_button(26, 2750);
 
     AnalogRepeatingDevice right_button(26, 3100, right_button_repeat, 500, 100);
-    AnalogRepeatingDevice left_button(26, 3375, left_button_repeat, 500, 100);
-    AnalogRepeatingDevice down_button(26, 3525, down_button_repeat, 500, 100);
-    AnalogRepeatingDevice up_button(26, 3800, up_button_repeat, 500, 100);
+    AnalogRepeatingDevice left_button(26, 3375, down_button_repeat, 500, 100);
+    AnalogRepeatingDevice down_button(26, 3525, up_button_repeat, 500, 100);
+    AnalogRepeatingDevice up_button(26, 3800, left_button_repeat, 500, 100);
+
+#else
+
+    //RepeatingButton vol_up_button(18, vol_down_repeat, 500);
+    //RepeatingButton vol_down_button(21, vol_down_repeat, 500);
+    Button vol_up_button(18, true, 50);
+    Button vol_down_button(21, true, 50);
+
+    Button back_button(17, true, 100);
+    Button select_button(20, true, 100);
+
+    //RepeatingButton right_button(15, right_button_repeat, 500);
+    //RepeatingButton left_button(13, left_button_repeat, 500);
+    //RepeatingButton down_button(14, down_button_repeat, 500);
+    //RepeatingButton up_button(12, up_button_repeat, 500);
+    Button right_button(15, true, 100);
+    Button left_button(13, true, 100);
+    Button down_button(14, true, 100);
+    Button up_button(12, true, 100);
+
+#endif
 
     puts("I/O Devices created.");
 
@@ -435,14 +484,14 @@ int main()
     int id_right_button = right_button.AddAction(&right_button_callback);
     int id_select_button = select_button.AddAction(&select_button_callback);
     int id_back_button = back_button.AddAction(&back_button_callback);
-    //int id_vol_down_button = vol_down_button.AddAction(&vol_down_button_callback);
-    //int id_vol_up_button = vol_up_button.AddAction(&vol_up_button_callback);
     int id_vol_down_button = vol_down_button.AddAction(&vol_down_button_callback);
     int id_vol_up_button = vol_up_button.AddAction(&vol_up_button_callback);
 
     puts("Callbacks linked.");
 
-    ResistorLadder<8> rladder(16, Pull::UP, GPIO_IRQ_EDGE_FALL);
+#if USING_RESISTOR_LADDER
+
+    DetectableResistorLadder<8> rladder(16, Pull::UP, GPIO_IRQ_EDGE_FALL);
     rladder[0] = &vol_up_button;
     rladder[1] = &vol_down_button;
     rladder[2] = &back_button;
@@ -456,6 +505,8 @@ int main()
     rladder.SortDevices();
 
     puts("Resistor ladder initialized.");
+
+#endif
 
     CountdownTimer hidden_message_timer;
 
@@ -471,6 +522,7 @@ int main()
 
     int id_hidden_message_timer = hidden_message_timer.AddAction([](const Event*, void*){
         hidden_message.SetPersonalVisibility(false);
+        manager.Update();
     });
 
     int id_selecttext2 = text2.AddAction([](const Event* ev, void* ptr){
@@ -570,8 +622,8 @@ int main()
         ComponentSelectEvent* event = ev->GetEventAsType<ComponentSelectEvent>();
         switch (event->GetControl())
         {
-            case DIRECTIONAL_UP: return vol_up_button_callback(nullptr, nullptr);
-            case DIRECTIONAL_DOWN: return vol_down_button_callback(nullptr, nullptr);
+            case DIRECTIONAL_UP: return volume_change(true);
+            case DIRECTIONAL_DOWN: return volume_change(false);
             default: return;
         }
     });
@@ -711,9 +763,12 @@ int main()
 
     puts("Screen manager updated, entering loop:");
 
+
     while (1)
     {
         Event::HandleEvents();
+        manager.UpdateDeltaTime();
         manager.UpdateIfAnyComponentMoving();
+        manager.UpdateIfCursorActivity();
     }
 }

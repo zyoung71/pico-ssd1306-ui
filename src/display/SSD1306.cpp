@@ -56,70 +56,25 @@ void SSD1306::UpdateDisplay()
     ssd1306_show(&display);
 }
 
-void SSD1306::DrawText(Vec2i32 pos, const char* text, const Font* font, uint32_t)
+void SSD1306::SetBrightness(uint8_t brightness)
 {
-    uint8_t font_data[font->char_bitmap.length + 5];
-    font_data[0] = font->char_height;
-    font_data[1] = font->char_width;
-    font_data[2] = font->char_spacing;
-    font_data[3] = font->ascii_begin;
-    font_data[4] = font->ascii_end;
-    
-    memcpy(font_data + 5, font->char_bitmap.data, font->char_bitmap.length);
-    ssd1306_draw_string_with_font(&display, pos.x, pos.y, 1, font_data, text);
+    ssd1306_contrast(&display, brightness);
 }
-void SSD1306::DrawPixel(Vec2i32 pos, uint32_t color)
+
+void SSD1306::DrawPixel(Vec2i32 pos, RGBA color)
 {
-    if (color)
+    if (color.alpha > 0)
         ssd1306_draw_pixel(&display, pos.x, pos.y);
     else
         ssd1306_clear_pixel(&display, pos.x, pos.y);
 }
-void SSD1306::DrawLine(Vec2i32 pos_begin, Vec2i32 pos_end, uint32_t)
-{
-    ssd1306_draw_line(&display, pos_begin.x, pos_begin.y, pos_end.x, pos_end.y);
-}
-void SSD1306::DrawPolygon(const Vec2i32* points, size_t pos_count, uint32_t, bool is_outline)
-{
-    if (is_outline)
-    {
-        for (size_t i = 0; i < pos_count; i++)
-        {
-            Vec2i32 begin = points[i];
-            Vec2i32 end = points[(i + 1) % pos_count];
-            ssd1306_draw_line(&display, begin.x, begin.y, end.x, end.y);
-        }
-    }
-    else
-    {
-        // fill the polygon
-        graphics::scanline_rasterization(points, pos_count, [](Vec2i32 pixel, void* usr){
-            ssd1306_draw_pixel((ssd1306_t*)usr, pixel.x, pixel.y);
-        }, &display);
-    }
-}
-void SSD1306::DrawSquare(Vec2i32 pos, Vec2i32 size, uint32_t color, bool is_outline, bool fill_if_outline)
-{
-    if (color == 0)
-        ssd1306_clear_square(&display, pos.x, pos.y, size.x - 1, size.y - 1);
-    else if (is_outline)
-    {
-        ssd1306_draw_empty_square(&display, pos.x, pos.y, size.x - 1, size.y - 1);
-        if (fill_if_outline)
-            ssd1306_clear_square(&display, pos.x + 1, pos.y + 1, size.x - 2, size.y - 2);
-    }
-    else
-        ssd1306_draw_square(&display, pos.x, pos.y, size.x - 1, size.y - 1);
-}
 
-void SSD1306::DrawScrollingText(Vec2i32 pos, const char* text, bool move_left, const Font* font, uint32_t color)
+void SSD1306::DrawPixel(int32_t x, int32_t y, RGBA color)
 {
-    // TODO
-}
-
-void SSD1306::DisplayBitmap(const uint8_t* bitmap_buff, size_t bitmap_size)
-{
-    ssd1306_bmp_show_image(&display, bitmap_buff, bitmap_size);
+    if (color.alpha > 0)
+        ssd1306_draw_pixel(&display, x, y);
+    else
+        ssd1306_clear_pixel(&display, x, y);
 }
 
 void SSD1306::ClearDisplay()
@@ -132,9 +87,4 @@ void SSD1306::InvertColors()
     static bool inverted = false;
     inverted = !inverted;
     ssd1306_invert(&display, !inverted);
-}
-
-void SSD1306::SetContrast(uint8_t contrast)
-{
-    ssd1306_contrast(&display, contrast);
 }

@@ -32,5 +32,5 @@ void SettingsCategoryComponent::Draw()
 {
     TextBoxComponent::Draw();
     // requires this component to have a low z-layer, as this below might obstruct what was drawn before in the area
-    display->DrawSquare(Vec2i32{0, 0}, Vec2i32{63, 15}, 0, false);
+    display->DrawRectangle(Vec2i32{0, 0}, Vec2i32{63, 15}, 0);
 }
