@@ -1,5 +1,4 @@
 #include <display/SSD1306.h>
-#include <math/Graphics.h>
 
 #include <cstring>
 

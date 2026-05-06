@@ -18,8 +18,6 @@
 #include <hardware/Timer.h>
 #include <hardware/ResistorLadder.h>
 
-#include <math/Graphics.h>
-
 #include <Icons.h>
 
 constexpr Vec2u32 screen_dimensions = {128, 64};
@@ -95,7 +93,7 @@ PixelBufferComponent vol_lvl_2(&manager, Vec2i32{13, 2}, volume_level_2_icon, 5,
 PixelBufferComponent vol_lvl_3(&manager, Vec2i32{14, 0}, volume_level_3_icon, 5, &screen1);
 
 TextBoxComponent volume_indicator(&manager, Vec2i32{63, -20}, Vec2i32{32, 12}, vol_txt, &SSD1306::default_font, INT32_MAX, &screen1);
-MovementAnimation volume_ind_move(&volume_indicator, graphics::easing::lut_quad_out);
+MovementAnimation volume_ind_move(&volume_indicator, easing::lut_quad_out);
 CountdownTimer volume_move_timer;
 
 void button_callback_generic(const Event* ev, uint32_t control_mask, const char* name = "")
@@ -541,7 +539,7 @@ int main()
         ComponentSelectEvent* event = ev->GetEventAsType<ComponentSelectEvent>();
         if (event->GetControl() == ControlAction::SELECT0)
         {
-            MovementAnimation animation(&text4, graphics::easing::lut_quad_in_out); // this is the coolest thing ever it ACTUALLY WORKS
+            MovementAnimation animation(&text4, easing::lut_quad_in_out); // this is the coolest thing ever it ACTUALLY WORKS
             animation.duration = 1.f;
             animation.end_pos = Vec2i32{100, 40};
             text4.Move(animation);

@@ -11,5 +11,5 @@ public:
     SettingsCategoryComponent(ScreenManager* manager, const Vec2i32& origin, const Vec2i32& dimensions, const char* text, const Font* font, int32_t z_layer, Screen* initial_screen = nullptr);
 
     void OnComponentHovered() override;
-    void Draw() override;
+    void Draw(const Screen* screen) override;
 };

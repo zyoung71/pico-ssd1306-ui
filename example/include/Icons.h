@@ -1,10 +1,10 @@
 #pragma once
 
-#include <interactive-ui/components/PixelBufferComponent.h>
-
+#include <interactive-ui/graphics/Pixel.h>
+#include <interactive-ui/graphics/Color.h>
 #include <util/ArrayView.h>
 
-constexpr uint32_t battery_icon_data[10][16] = {
+constexpr RGBA battery_icon_data[10][16] = {
     {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -17,7 +17,7 @@ constexpr uint32_t battery_icon_data[10][16] = {
     {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 };
 
-constexpr uint32_t speaker_icon_data[15][10] = {
+constexpr RGBA speaker_icon_data[15][10] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
     {0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
@@ -89,14 +89,14 @@ constexpr Pixel volume_level_3_buffer_data[] = {
     {{0, 14}, 1},
 };
 
-constexpr uint32_t increment_icon_data[3][5] = {
+constexpr RGBA increment_icon_data[3][5] = {
     {0, 0, 1, 0, 0},
     {0, 1, 0, 1, 0},
     {1, 0, 0, 0, 1}
 };
 
-constexpr ArrayView2D<uint32_t> battery_icon = make_array_view(battery_icon_data);
-constexpr ArrayView2D<uint32_t> speaker_icon = make_array_view(speaker_icon_data);
+constexpr ArrayView2D<RGBA> battery_icon = make_array_view(battery_icon_data);
+constexpr ArrayView2D<RGBA> speaker_icon = make_array_view(speaker_icon_data);
 
 constexpr ArrayView<Pixel> x_icon = make_array_view(x_icon_buffer_data);
 
@@ -104,4 +104,4 @@ constexpr ArrayView<Pixel> volume_level_1_icon = make_array_view(volume_level_1_
 constexpr ArrayView<Pixel> volume_level_2_icon = make_array_view(volume_level_2_buffer_data);
 constexpr ArrayView<Pixel> volume_level_3_icon = make_array_view(volume_level_3_buffer_data);
 
-constexpr ArrayView2D<uint32_t> increment_icon = make_array_view(increment_icon_data);
+constexpr ArrayView2D<RGBA> increment_icon = make_array_view(increment_icon_data);

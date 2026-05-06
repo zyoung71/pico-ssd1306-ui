@@ -28,9 +28,9 @@ void SettingsCategoryComponent::OnComponentHovered()
     }
 }
 
-void SettingsCategoryComponent::Draw()
+void SettingsCategoryComponent::Draw(const Screen* screen)
 {
-    TextBoxComponent::Draw();
+    TextBoxComponent::Draw(screen);
     // requires this component to have a low z-layer, as this below might obstruct what was drawn before in the area
     display->DrawRectangle(Vec2i32{0, 0}, Vec2i32{63, 15}, 0);
 }
