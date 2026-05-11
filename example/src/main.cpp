@@ -40,49 +40,49 @@ Screen screen1(&manager, screen_dimensions);
 Screen screen2(&manager, screen_dimensions);
 Screen screen3(&manager, screen_dimensions);
 
-TextComponent text1(&manager, Vec2i32{16, 20}, "0", &SSD1306::default_font, 1, &screen1);
-TextComponent text2(&manager, Vec2i32{16, 32}, "1", &SSD1306::default_font, 2, &screen1);
-TextComponent text3(&manager, Vec2i32{32, 20}, "2", &SSD1306::default_font, 3, &screen1);
-TextComponent text4(&manager, Vec2i32{32, 32}, "3", &SSD1306::default_font, 4, &screen1);
+TextComponent text1(&manager, Vec2i32{16, 20}, "0", &fonts::default_font, 1, &screen1);
+TextComponent text2(&manager, Vec2i32{16, 32}, "1", &fonts::default_font, 2, &screen1);
+TextComponent text3(&manager, Vec2i32{32, 20}, "2", &fonts::default_font, 3, &screen1);
+TextComponent text4(&manager, Vec2i32{32, 32}, "3", &fonts::default_font, 4, &screen1);
 PaddingComponent padding(&manager, Vec2i32{0, 16}, {127, 63 - 16}, 3, &screen1);
-TextBoxComponent hidden_message(&manager, Vec2i32{64, 32}, Vec2i32{64, 32}, "Message", &SSD1306::default_font, 3, &screen1);
+TextBoxComponent hidden_message(&manager, Vec2i32{64, 32}, Vec2i32{64, 32}, "Message", &fonts::default_font, 3, &screen1);
 
-TextBoxComponent screen2_message(&manager, Vec2i32{0, 0}, Vec2i32{127, 63}, "Screen 2", &SSD1306::default_font, 0, &screen2);
+TextBoxComponent screen2_message(&manager, Vec2i32{0, 0}, Vec2i32{127, 63}, "Screen 2", &fonts::default_font, 0, &screen2);
 
 PaddingComponent settings_padding(&manager, Vec2i32{0, 0}, Vec2i32{127, 63}, 0, &screen3);
-TextComponent settings_back(&manager, Vec2i32{4, 4}, "Back", &SSD1306::default_font, 2, &screen3);
-SettingsCategoryComponent settings_display(&manager, Vec2i32{4, 20}, Vec2i32{50, 11}, "Display", &SSD1306::default_font, -1, &screen3);
-SettingsCategoryComponent settings_volume(&manager, Vec2i32{4, 40}, Vec2i32{50, 11}, "Volume", &SSD1306::default_font, -1, &screen3);
-SettingsCategoryComponent settings_clock(&manager, Vec2i32{4, 60}, Vec2i32{50, 11}, "Clock", &SSD1306::default_font, -1, &screen3);
-SettingsCategoryComponent settings_restart(&manager, Vec2i32{4, 80}, Vec2i32{50, 11}, "Restart", &SSD1306::default_font, -1, &screen3);
+TextComponent settings_back(&manager, Vec2i32{4, 4}, "Back", &fonts::default_font, 2, &screen3);
+SettingsCategoryComponent settings_display(&manager, Vec2i32{4, 20}, Vec2i32{50, 11}, "Display", &fonts::default_font, -1, &screen3);
+SettingsCategoryComponent settings_volume(&manager, Vec2i32{4, 40}, Vec2i32{50, 11}, "Volume", &fonts::default_font, -1, &screen3);
+SettingsCategoryComponent settings_clock(&manager, Vec2i32{4, 60}, Vec2i32{50, 11}, "Clock", &fonts::default_font, -1, &screen3);
+SettingsCategoryComponent settings_restart(&manager, Vec2i32{4, 80}, Vec2i32{50, 11}, "Restart", &fonts::default_font, -1, &screen3);
 
 char vol_txt[4];
 
 Screen screen_volume_control(&manager, screen_dimensions);
-TextBoxComponent volume_control_value(&manager, Vec2i32{24, 26}, Vec2i32{20, 11}, vol_txt, &SSD1306::default_font, 3, &screen_volume_control);
+TextBoxComponent volume_control_value(&manager, Vec2i32{24, 26}, Vec2i32{20, 11}, vol_txt, &fonts::default_font, 3, &screen_volume_control);
 BitmapComponent volume_increment(&manager, Vec2i32{32, 20}, increment_icon, 3, &screen_volume_control);
 BitmapComponent volume_decrement = volume_increment;
-TextComponent volume_screen_name(&manager, Vec2i32{24, 4}, "Volume Control", &SSD1306::default_font, 0, &screen_volume_control);
-TextBoxComponent volume_variable_checkbox(&manager, Vec2i32{80, 28}, Vec2i32{7, 7}, "Variable\n\nVolume", &SSD1306::default_font, 0, &screen_volume_control);
+TextComponent volume_screen_name(&manager, Vec2i32{24, 4}, "Volume Control", &fonts::default_font, 0, &screen_volume_control);
+TextBoxComponent volume_variable_checkbox(&manager, Vec2i32{80, 28}, Vec2i32{7, 7}, "Variable\n\nVolume", &fonts::default_font, 0, &screen_volume_control);
 PixelBufferComponent volume_variable_checkbox_check(&manager, Vec2i32{81, 29}, x_icon, 1, &screen_volume_control);
 
 Screen screen_clock_control(&manager, screen_dimensions);
-TextBoxComponent hour_control(&manager, Vec2f{0.4f, 0.5f}, Vec2i32{15, 13}, ClockComponent::cc_hour, &SSD1306::default_font, 1, &screen_clock_control);
-TextBoxComponent minute_control(&manager, Vec2f{0.6f, 0.5f}, Vec2i32{15, 13}, ClockComponent::cc_minute, &SSD1306::default_font, 1, &screen_clock_control);
-TextComponent time_control_colon(&manager, Vec2f{0.5f, 0.5f}, ":", &SSD1306::default_font, 1, &screen_clock_control);
-TextComponent time_control_am_pm(&manager, Vec2f{0.75f, 0.5f}, ClockComponent::cc_am_pm, &SSD1306::default_font, 1, &screen_clock_control);
+TextBoxComponent hour_control(&manager, Vec2f{0.4f, 0.5f}, Vec2i32{15, 13}, ClockComponent::cc_hour, &fonts::default_font, 1, &screen_clock_control);
+TextBoxComponent minute_control(&manager, Vec2f{0.6f, 0.5f}, Vec2i32{15, 13}, ClockComponent::cc_minute, &fonts::default_font, 1, &screen_clock_control);
+TextComponent time_control_colon(&manager, Vec2f{0.5f, 0.5f}, ":", &fonts::default_font, 1, &screen_clock_control);
+TextComponent time_control_am_pm(&manager, Vec2f{0.75f, 0.5f}, ClockComponent::cc_am_pm, &fonts::default_font, 1, &screen_clock_control);
 BitmapComponent hour_increment(&manager, Vec2i32{0, 0}, increment_icon, 1, &screen_clock_control); // set pos later
 BitmapComponent hour_decrement = hour_increment;
 BitmapComponent minute_increment = hour_increment;
 BitmapComponent minute_decrement = hour_increment;
-TextBoxComponent clock_control_confirm(&manager, Vec2f{0.5f, 0.75f}, Vec2i32{53, 13}, "Confirm", &SSD1306::default_font, 1, &screen_clock_control);
-TextBoxComponent clock_change_time_fmt(&manager, Vec2f{0.5f, 0.15f}, Vec2i32{7, 7}, "  24  Hour", &SSD1306::default_font, 1, &screen_clock_control);
+TextBoxComponent clock_control_confirm(&manager, Vec2f{0.5f, 0.75f}, Vec2i32{53, 13}, "Confirm", &fonts::default_font, 1, &screen_clock_control);
+TextBoxComponent clock_change_time_fmt(&manager, Vec2f{0.5f, 0.15f}, Vec2i32{7, 7}, "  24  Hour", &fonts::default_font, 1, &screen_clock_control);
 PixelBufferComponent clock_change_time_fmt_check(&manager, Vec2f{0.5f, 0.15f}, x_icon, 2, &screen_clock_control);
 
 bool lpm = false;
 bool screen_pwr = true;
 BitmapComponent battery(&manager, Vec2i32{126, 2}, battery_icon, 10);
-TextComponent battery_lpm_message(&manager, battery.GetOriginPosition() + Vec2i32{-20, 2}, "LPM", &SSD1306::default_font, 10);
+TextComponent battery_lpm_message(&manager, battery.GetOriginPosition() + Vec2i32{-20, 2}, "LPM", &fonts::default_font, 10);
 CountdownTimer lpm_sleep_timer;
 
 uint8_t volume_percentage = 50;
@@ -92,7 +92,7 @@ PixelBufferComponent vol_lvl_1(&manager, Vec2i32{12, 4}, volume_level_1_icon, 5,
 PixelBufferComponent vol_lvl_2(&manager, Vec2i32{13, 2}, volume_level_2_icon, 5, &screen1);
 PixelBufferComponent vol_lvl_3(&manager, Vec2i32{14, 0}, volume_level_3_icon, 5, &screen1);
 
-TextBoxComponent volume_indicator(&manager, Vec2i32{63, -20}, Vec2i32{32, 12}, vol_txt, &SSD1306::default_font, INT32_MAX, &screen1);
+TextBoxComponent volume_indicator(&manager, Vec2i32{63, -20}, Vec2i32{32, 12}, vol_txt, &fonts::default_font, INT32_MAX, &screen1);
 MovementAnimation volume_ind_move(&volume_indicator, easing::lut_quad_out);
 CountdownTimer volume_move_timer;
 
@@ -272,7 +272,7 @@ int main()
 {
     puts("Program start.");
 
-    ClockComponent clock(&manager, Vec2i32{63, 2}, 4, 5, 6, &SSD1306::default_font, -1, &screen1);
+    ClockComponent clock(&manager, Vec2i32{63, 2}, 4, 5, 6, &fonts::default_font, -1, &screen1);
 
     puts("Objects created.");
 

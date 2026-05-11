@@ -2,19 +2,13 @@
 
 #include <interactive-ui/DisplayInterface.h>
 
-#include <util/ArrayView.h>
-
 extern "C"
 {
 #include <ssd1306.h>
-#include <font.h>
 }
 
 class SSD1306 : public DisplayInterface
 {
-public:
-    constexpr static Font default_font = Font::BuildFont<8, 5, 1>(font_8x5 + 5); // take original font data only
-
 private:
     uint8_t sda_pin;
     uint8_t scl_pin;
@@ -42,4 +36,6 @@ public:
 
     void DrawPixel(Vec2i32 pos, RGBA color) override;
     void DrawPixel(int32_t x, int32_t y, RGBA color) override;
+    RGBA GetPixel(Vec2i32 pos) const override;
+    RGBA GetPixel(int32_t x, int32_t y) const override;
 };

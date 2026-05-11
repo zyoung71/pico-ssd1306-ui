@@ -1,7 +1,5 @@
 #include <display/SSD1306.h>
 
-#include <cstring>
-
 SSD1306::SSD1306(uint8_t sda_pin, uint8_t scl_pin, i2c_inst_t* i2c_inst, uint8_t addr)
     : sda_pin(sda_pin), scl_pin(scl_pin), addr(addr), i2c_inst(i2c_inst)
 {
@@ -74,6 +72,16 @@ void SSD1306::DrawPixel(int32_t x, int32_t y, RGBA color)
         ssd1306_draw_pixel(&display, x, y);
     else
         ssd1306_clear_pixel(&display, x, y);
+}
+
+RGBA SSD1306::GetPixel(Vec2i32 pos) const
+{
+    return display.buffer[pos.x + display.width * (pos.y >> 3)] & 0x01 << (pos.y & 0x07);
+}
+
+RGBA SSD1306::GetPixel(int32_t x, int32_t y) const
+{
+    return display.buffer[x + display.width * (y >> 3)] & 0x01 << (y & 0x07);
 }
 
 void SSD1306::ClearDisplay()
